@@ -2,32 +2,29 @@ package com.bridgelabz.employeepayrollapp.service;
 
 import com.bridgelabz.employeepayrollapp.dto.EmployeePayrollDTO;
 import com.bridgelabz.employeepayrollapp.model.EmployeePayrollData;
+import com.bridgelabz.employeepayrollapp.repository.EmployeePayrollRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
 public class EmployeePayrollService {
 
-    private List<EmployeePayrollData> employeePayrollList = new ArrayList<>();
-    private long idCounter = 1;
+    @Autowired
+    private EmployeePayrollRepository employeePayrollRepository;
 
     public List<EmployeePayrollData> getEmployeePayrollData() {
-        return employeePayrollList;
+        return employeePayrollRepository.findAll();
     }
 
     public EmployeePayrollData getEmployeePayrollDataById(long id) {
-        return employeePayrollList.stream()
-                .filter(e -> e.getId() == id)
-                .findFirst()
-                .orElse(null);
+        return employeePayrollRepository.findById(id).orElse(null);
     }
 
     public EmployeePayrollData createEmployeePayrollData(EmployeePayrollDTO payrollDTO) {
-        EmployeePayrollData data = new EmployeePayrollData(idCounter++, payrollDTO);
-        employeePayrollList.add(data);
-        return data;
+        EmployeePayrollData data = new EmployeePayrollData(payrollDTO);
+        return employeePayrollRepository.save(data);
     }
 
     public EmployeePayrollData updateEmployeePayrollData(long id, EmployeePayrollDTO payrollDTO) {
@@ -35,12 +32,13 @@ public class EmployeePayrollService {
         if (data != null) {
             data.setName(payrollDTO.getName());
             data.setSalary(payrollDTO.getSalary());
+            return employeePayrollRepository.save(data);
         }
-        return data;
+        return null;
     }
 
     public String deleteEmployeePayrollData(long id) {
-        employeePayrollList.removeIf(e -> e.getId() == id);
+        employeePayrollRepository.deleteById(id);
         return "Employee with id " + id + " deleted successfully";
     }
 }
